@@ -2,11 +2,12 @@ package com.incture.erasm.service;
 
 import java.util.List;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.incture.erasm.entity.Project;
-import com.incture.erasm.exception.ResourceNotFoundException;
+import com.incture.erasm.exception.ProjectNotFoundException;
 import com.incture.erasm.repository.ProjectRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +34,7 @@ public class ProjectService {
 
     public Project getProjectById(Long id) {
         return projectRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
+                .orElseThrow(() -> new ProjectNotFoundException("Project not found with ID: " + id));
     }
 
     public Project updateProject(Project project) {
@@ -44,8 +45,8 @@ public class ProjectService {
     }
 
     public Project closeProject(Long id) {
-        Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
+    	Project project = projectRepository.findById(id)
+    	        .orElseThrow(() -> new ProjectNotFoundException("Project not found with ID: " + id));
         project.setStatus("CLOSED");
         Project closedProject = projectRepository.save(project);
         auditLogService.saveAudit("CLOSE", "Project", closedProject.getId(), "SYSTEM", "Project closed successfully");

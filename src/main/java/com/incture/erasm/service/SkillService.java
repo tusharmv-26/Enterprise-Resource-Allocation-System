@@ -2,10 +2,12 @@ package com.incture.erasm.service;
 
 import java.util.List;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.incture.erasm.entity.Skill;
+import com.incture.erasm.exception.SkillNotFoundException;
 import com.incture.erasm.repository.SkillRepository;
 
 @Service
@@ -22,7 +24,8 @@ public class SkillService {
 	}
 	
 	public Skill getSkillById(Long id) {
-		return skillRepository.findById(id).get();
+	    return skillRepository.findById(id)
+	            .orElseThrow(() -> new SkillNotFoundException("Skill not found with ID: " + id));
 	}
 	
 	public Skill updateSkill(Skill skill) {

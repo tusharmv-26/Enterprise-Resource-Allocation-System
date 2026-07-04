@@ -53,6 +53,8 @@ public class CertificationService {
     }
 
     public void deleteCertification(Long id) {
-        certificationRepository.deleteById(id);
+        Certification certification = certificationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Certification not found with ID: " + id));
+        certificationRepository.delete(certification);
     }
 }

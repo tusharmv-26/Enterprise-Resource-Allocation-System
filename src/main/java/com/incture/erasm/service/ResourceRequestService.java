@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import com.incture.erasm.entity.Project;
 import com.incture.erasm.entity.ResourceRequest;
 import com.incture.erasm.enums.RequestStatus;
+import com.incture.erasm.exception.ProjectNotFoundException;
 import com.incture.erasm.exception.ResourceNotFoundException;
 import com.incture.erasm.repository.ProjectRepository;
 import com.incture.erasm.repository.ResourceRequestRepository;
@@ -28,7 +29,7 @@ public class ResourceRequestService {
     public ResourceRequest saveResourceRequest(ResourceRequest resourceRequest) {
         Long projectId = resourceRequest.getProject().getId();
         Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
+                .orElseThrow(() -> new ProjectNotFoundException("Project not found with ID: " + projectId));
         resourceRequest.setProject(project);
         resourceRequest.setStatus(RequestStatus.DRAFT);
         ResourceRequest savedRequest = resourceRequestRepository.save(resourceRequest);

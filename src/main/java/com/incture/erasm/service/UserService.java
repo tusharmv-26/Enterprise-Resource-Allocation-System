@@ -2,10 +2,10 @@ package com.incture.erasm.service;
 
 import java.util.List;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.incture.erasm.exception.UserNotFoundException;
 
 import com.incture.erasm.entity.User;
 import com.incture.erasm.repository.UserRepository;
@@ -28,7 +28,9 @@ public class UserService {
 	}
 	
 	public User getUserById(Long id) {
-		return userRepository.findById(id).get();
+	    return userRepository.findById(id)
+	            .orElseThrow(() ->
+	                    new UserNotFoundException("User not found with id: " + id));
 	}
 	
 	public User updateUser(User user) {

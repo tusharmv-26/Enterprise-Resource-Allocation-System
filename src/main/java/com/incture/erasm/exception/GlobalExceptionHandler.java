@@ -11,41 +11,74 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<Object> handleResourceNotFound(ResourceNotFoundException ex) {
+    private ResponseEntity<Object> buildResponse(
+            HttpStatus status,
+            String error,
+            String message) {
+
         Map<String, Object> body = new LinkedHashMap<>();
 
         body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.NOT_FOUND.value());
-        body.put("error", "Resource Not Found");
-        body.put("message", ex.getMessage());
+        body.put("status", status.value());
+        body.put("error", error);
+        body.put("message", message);
 
-        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(body, status);
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<Object> handleUserNotFound(UserNotFoundException ex) {
+        return buildResponse(
+                HttpStatus.NOT_FOUND,
+                "User Not Found",
+                ex.getMessage());
+    }
+
+    @ExceptionHandler(ProjectNotFoundException.class)
+    public ResponseEntity<Object> handleProjectNotFound(ProjectNotFoundException ex) {
+        return buildResponse(
+                HttpStatus.NOT_FOUND,
+                "Project Not Found",
+                ex.getMessage());
+    }
+
+    @ExceptionHandler(SkillNotFoundException.class)
+    public ResponseEntity<Object> handleSkillNotFound(SkillNotFoundException ex) {
+        return buildResponse(
+                HttpStatus.NOT_FOUND,
+                "Skill Not Found",
+                ex.getMessage());
+    }
+
+    @ExceptionHandler(AllocationException.class)
+    public ResponseEntity<Object> handleAllocationException(AllocationException ex) {
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                "Allocation Error",
+                ex.getMessage());
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<Object> handleResourceNotFound(ResourceNotFoundException ex) {
+        return buildResponse(
+                HttpStatus.NOT_FOUND,
+                "Resource Not Found",
+                ex.getMessage());
     }
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Object> handleRuntimeException(RuntimeException ex) {
-
-        Map<String, Object> body = new LinkedHashMap<>();
-
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.BAD_REQUEST.value());
-        body.put("error", "Bad Request");
-        body.put("message", ex.getMessage());
-
-        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                "Bad Request",
+                ex.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleException(Exception ex) {
-
-        Map<String, Object> body = new LinkedHashMap<>();
-
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-        body.put("error", "Internal Server Error");
-        body.put("message", ex.getMessage());
-
-        return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
+        return buildResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Internal Server Error",
+                ex.getMessage());
     }
 }

@@ -19,6 +19,8 @@ import com.incture.erasm.entity.Project;
 import com.incture.erasm.entity.ResourceRequest;
 import com.incture.erasm.enums.RequestStatus;
 import com.incture.erasm.exception.ResourceNotFoundException;
+import com.incture.erasm.exception.AllocationException;
+import com.incture.erasm.exception.ProjectNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,19 +55,19 @@ public class AllocationService {
 	    Employee employee = employeeRepository.findById(dto.getEmployeeId())
 	            .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
 	    Project project = projectRepository.findById(dto.getProjectId())
-	            .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
+	            .orElseThrow(() -> new ProjectNotFoundException("Project not found with ID: " + dto.getProjectId()));
 	    ResourceRequest request = resourceRequestRepository.findById(dto.getResourceRequestId())
 	            .orElseThrow(() -> new ResourceNotFoundException("Resource Request not found"));
 
 	    if (!employee.isAvailable()) {
-	        throw new RuntimeException("Employee is not available for allocation");
+	    	throw new AllocationException("Employee is not available for allocation");
 	    }
 	    if (request.getStatus() != RequestStatus.APPROVED) {
-	        throw new RuntimeException("Only APPROVED requests can be allocated");
+	    	throw new AllocationException("Only APPROVED requests can be allocated");
 	    }
 	    int currentAllocation = getCurrentAllocationPercentage(employee.getId());
 	    if (currentAllocation + dto.getAllocationPercentage() > 100) {
-	        throw new RuntimeException("Employee allocation cannot exceed 100%");
+	    	throw new AllocationException("Employee allocation cannot exceed 100%");
 	    }
 	    
 	    Allocation allocation = new Allocation();
@@ -108,10 +110,10 @@ public class AllocationService {
 	
 	public Allocation releaseEmployee(Long allocationId) {
 		Allocation allocation = allocationRepository.findById(allocationId)
-				.orElseThrow(() -> new ResourceNotFoundException("Allocation not found"));
+				.orElseThrow(() -> new AllocationException("Allocation not found"));
 		
 		if("RELEASED".equalsIgnoreCase(allocation.getAllocationStatus())) {
-			throw new RuntimeException("Employee already released");
+			throw new AllocationException("Employee already released");
 		}
 		
 		Employee employee = allocation.getEmployee();
@@ -142,10 +144,10 @@ public class AllocationService {
 
 	public Allocation reallocateEmployee(Long allocationId, Long projectId, Long resourceRequestId) {
 		Allocation allocation = allocationRepository.findById(allocationId)
-				.orElseThrow(() -> new ResourceNotFoundException("Allocation not found"));
+				.orElseThrow(() -> new AllocationException("Allocation not found with ID: " + allocationId));
 		
 		Project project = projectRepository.findById(projectId)
-				.orElseThrow(() -> new ResourceNotFoundException("Project not found"));
+				.orElseThrow(() -> new ProjectNotFoundException("Project not found with ID: " + projectId));
 		
 		ResourceRequest request = resourceRequestRepository.findById(resourceRequestId)
 				.orElseThrow(() -> new ResourceNotFoundException("Resource Request not found"));
@@ -175,8 +177,8 @@ public class AllocationService {
 	}
 	
 	public Allocation getAllocationById(Long id) {
-	    return allocationRepository.findById(id)
-	            .orElseThrow(() -> new ResourceNotFoundException("Allocation not found"));
+		return allocationRepository.findById(id)
+		        .orElseThrow(() -> new AllocationException("Allocation not found with ID: " + id));
 	}
 	
 	public Allocation updateAllocation(Allocation allocation) {

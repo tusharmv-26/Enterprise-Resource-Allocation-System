@@ -9,6 +9,7 @@ import com.incture.erasm.entity.Employee;
 import com.incture.erasm.entity.EmployeeSkillLevel;
 import com.incture.erasm.entity.Skill;
 import com.incture.erasm.exception.ResourceNotFoundException;
+import com.incture.erasm.exception.SkillNotFoundException;
 import com.incture.erasm.repository.EmployeeRepository;
 import com.incture.erasm.repository.EmployeeSkillLevelRepository;
 import com.incture.erasm.repository.SkillRepository;
@@ -33,7 +34,7 @@ public class EmployeeSkillLevelService {
                 .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
 
         Skill skill = skillRepository.findById(skillId)
-                .orElseThrow(() -> new ResourceNotFoundException("Skill not found"));
+                .orElseThrow(() -> new SkillNotFoundException("Skill not found with ID: " + skillId));
 
         employeeSkillLevel.setEmployee(employee);
         employeeSkillLevel.setSkill(skill);
