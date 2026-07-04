@@ -3,6 +3,7 @@ package com.incture.erasm.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,23 +24,26 @@ public class CertificationController {
     private CertificationService certificationService;
 
     @PostMapping
+    @PreAuthorize("isAuthenticated()")
     public Certification saveCertification(@RequestBody CertificationRequestDTO dto) {
         return certificationService.saveCertification(dto);
     }
 
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public List<Certification> getAllCertifications() {
         return certificationService.getAllCertifications();
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public Certification getCertificationById(@PathVariable Long id) {
         return certificationService.getCertificationById(id);
     }
 
     @PutMapping("/{id}")
-    public Certification updateCertification(@PathVariable Long id,
-            @RequestBody Certification certification) {
+    @PreAuthorize("isAuthenticated()")
+    public Certification updateCertification(@PathVariable Long id, @RequestBody Certification certification) {
 
         certification.setId(id);
 
@@ -47,10 +51,9 @@ public class CertificationController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public String deleteCertification(@PathVariable Long id) {
-
         certificationService.deleteCertification(id);
-
         return "Certification deleted successfully";
     }
 }
