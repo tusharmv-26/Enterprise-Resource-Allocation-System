@@ -60,14 +60,17 @@ public class AllocationService {
 	            .orElseThrow(() -> new ResourceNotFoundException("Resource Request not found"));
 
 	    if (!employee.isAvailable()) {
-	    	throw new AllocationException("Employee is not available for allocation");
+	        logger.warn("Allocation failed. Employee ID {} is not available.", employee.getId());
+	        throw new AllocationException("Employee is not available for allocation");
 	    }
 	    if (request.getStatus() != RequestStatus.APPROVED) {
-	    	throw new AllocationException("Only APPROVED requests can be allocated");
+	        logger.warn("Allocation failed. Resource Request ID {} is not in APPROVED state.", request.getId());
+	        throw new AllocationException("Only APPROVED requests can be allocated");
 	    }
 	    int currentAllocation = getCurrentAllocationPercentage(employee.getId());
 	    if (currentAllocation + dto.getAllocationPercentage() > 100) {
-	    	throw new AllocationException("Employee allocation cannot exceed 100%");
+	        logger.warn("Allocation failed. Employee ID {} allocation exceeded 100%.", employee.getId());
+	        throw new AllocationException("Employee allocation cannot exceed 100%");
 	    }
 	    
 	    Allocation allocation = new Allocation();
@@ -113,7 +116,8 @@ public class AllocationService {
 				.orElseThrow(() -> new AllocationException("Allocation not found"));
 		
 		if("RELEASED".equalsIgnoreCase(allocation.getAllocationStatus())) {
-			throw new AllocationException("Employee already released");
+		    logger.warn("Release failed. Allocation ID {} is already released.", allocationId);
+		    throw new AllocationException("Employee already released");
 		}
 		
 		Employee employee = allocation.getEmployee();
@@ -145,10 +149,8 @@ public class AllocationService {
 	public Allocation reallocateEmployee(Long allocationId, Long projectId, Long resourceRequestId) {
 		Allocation allocation = allocationRepository.findById(allocationId)
 				.orElseThrow(() -> new AllocationException("Allocation not found with ID: " + allocationId));
-		
 		Project project = projectRepository.findById(projectId)
 				.orElseThrow(() -> new ProjectNotFoundException("Project not found with ID: " + projectId));
-		
 		ResourceRequest request = resourceRequestRepository.findById(resourceRequestId)
 				.orElseThrow(() -> new ResourceNotFoundException("Resource Request not found"));
 		
@@ -195,8 +197,8 @@ public class AllocationService {
 	}
 	
 	public void deleteAllocation(Long id) {
+		allocationRepository.deleteById(id);
 	    logger.info("Deleting Allocation. Allocation ID: {}", id);
-	    allocationRepository.deleteById(id);
 	    auditLogService.saveAudit(
 	            "DELETE",
 	            "Allocation",
