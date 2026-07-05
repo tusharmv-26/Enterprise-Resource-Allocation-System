@@ -46,7 +46,7 @@ public class AuthenticationController {
                     .body("Invalid email or password");
         }
         String token = jwtUtil.generateToken(customUser.getUsername());
-        logger.info("User '{}' logged in successfully", request.getEmail());
+        logger.info("User '{}' authenticated successfully", request.getEmail());
         return ResponseEntity.ok(new LoginResponse(token));
     }
 }
